@@ -50,9 +50,13 @@ def sample_func(model, n_samples=10, log_step=200, use_wandb=False):
 
         if t % log_step == 0 or t == 0:
             reverse_steps.append(x[0].tolist())
+    
+    # let's clip at the end - this is important, but we don't want to interfere with denosing process
+    x = torch.clip(x, 0, 1)
+    reverse_steps = torch.clip(torch.tensor(reverse_steps), 0, 1)
         
     if use_wandb:
         wandb.log({"samples": wandb.Image(make_grid(x, nrow=5))})
-        wandb.log({"reverse step": wandb.Image(make_grid(torch.tensor(reverse_steps), nrow=len(reverse_steps)))})
+        wandb.log({"reverse step": wandb.Image(make_grid(torch.tensor(reverse_steps), nrow=reverse_steps.shape[0]))})
 
-    return x, torch.tensor(reverse_steps)
+    return x, reverse_steps

@@ -14,7 +14,7 @@ from sample import sample_func
 
 SEED = 42
 
-def train_func(model, n_epochs=5, use_wandb=False):
+def train_func(model, n_epochs=5, use_wandb=False, sample_during_training=False):
     np.random.seed(SEED)
     torch.manual_seed(SEED)
     if torch.cuda.is_available():
@@ -56,6 +56,7 @@ def train_func(model, n_epochs=5, use_wandb=False):
                 wandb.log({'train loss': loss.item()}, step=step)
             step += 1
             train_losses.append(loss.item())
-        sample_func(model, use_wandb=use_wandb)
+        if sample_during_training:
+            sample_func(model, use_wandb=use_wandb)
     
     return train_losses
