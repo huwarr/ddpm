@@ -1,28 +1,30 @@
 from dataloader import get_dataloaders
 from model import UNet
 
+import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import numpy as np
 
 from tqdm.auto import tqdm
+import wandb
 
 
 
 SEED = 42
 
-def sample_func(model, n_samples=10, use_wandb=False, wandb_key=''):
+def sample_func(model, n_samples=10, use_wandb=False):
     np.random.seed(SEED)
     torch.manual_seed(SEED)
     if torch.cuda.is_available():
         torch.cuda.manual_seed_all(SEED)
         torch.backends.cudnn.deterministic = True
     
-    if use_wandb:
-        wandb.login(key=wandb_key)
-        wandb.init(project='ddpm')
+    #if use_wandb:
+        #wandb.login(key=wandb_key)
+        #wandb.init(project='ddpm')
 
-    device = torch.device('cuda:0' if use_gpu else 'cpu')
+    device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
     T = 1000
     beta_s = np.linspace(1e-4, 0.02, T)
@@ -33,24 +35,32 @@ def sample_func(model, n_samples=10, use_wandb=False, wandb_key=''):
     model.eval()
 
     size = (n_samples, 1, 32, 32)
-    x = np.random.normal(loc=0.0, scale=1.0, size=size)
+    x = torch.from_numpy(np.random.normal(loc=0.0, scale=1.0, size=size))
 
     all_samples = [x]
     if use_wandb:
-        wandb.log({"samples": wandb.Image(x)})
+        wandb.log({"reverse step": wandb.Image(x[0])})
     
     for t in tqdm(range(T - 1, -1, -1), desc='Sampling'):
-        z = np.random.normal(loc=0.0, scale=1.0, size=size) if t > 0 else 0
+        z = np.random.normal(loc=0.0, scale=1.0, size=size) if t > 0 else np.zeros(size)
 
-        t_s = torch.tensor([t] * n_samples)
+        t_s = torch.tensor([t] * n_samples).to(device)
+        x = x.to(device)
+        with torch.no_grad():
+            noise_predicted = model(x.float(), t_s)
+        x = x.cpu()
+        noise_predicted = noise_predicted.cpu()
 
-        noise_predicted = model(x, t_s)
-        multiplier = (1 - alpha_s[t]) / ((1 - alpha_s_new) ** (1/2))
+        multiplier = (1 - alpha_s[t]) / ((1 - alpha_s_new[t]) ** (1/2))
+        x = (x - multiplier * noise_predicted) / (alpha_s[t] ** (1/2)) + (beta_s[t] ** (1/2)) * torch.from_numpy(z)
 
-        x = (x - multiplier * noise_predicted) / (alpha_s[t] ** (1/2)) + (beta_s[t] ** (1/2)) * z
+        if t % 200 == 0:
+            all_samples.append(x)
+            if use_wandb:
+                wandb.log({"reverse step": wandb.Image(x[0])})
+        
+    if use_wandb:
+        for sample in x:
+            wandb.log({"samples": wandb.Image(sample)})
 
-        if t % 200 == 0 and use_wandb:
-            wandb.log({"samples": wandb.Image(x)})
-        all_samples.append(x)
-    
     return all_samples
