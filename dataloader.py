@@ -8,9 +8,7 @@ def get_dataloaders():
     # Transforms
     train_transform = transforms.Compose([
         transforms.ToTensor(),
-        transforms.Resize((32, 32)),
-        # DDPM, Appendix B -> "We used random horizontal flips during training"
-        transforms.RandomHorizontalFlip()
+        transforms.Resize((32, 32))
     ])
     test_transform = transforms.Compose([
         transforms.ToTensor(),
