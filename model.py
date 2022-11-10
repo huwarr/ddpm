@@ -35,13 +35,13 @@ class ConvResidBlock(nn.Module):
             nn.GroupNorm(num_groups=n_groups, num_channels=out_channels),
             nn.ReLU(),
             # Wide Resnet, 2.4 -> "add a dropout layer into each residual block between convolutions and after ReLU"
-            nn.Droupout(dropout),
+            nn.Dropout(dropout),
             nn.Conv2d(out_channels, out_channels, kernel_size=3, padding=1)
         )
         # for residual connection
         self.conv1 = nn.Conv2d(in_channels, out_channels, kernel_size=1)
 
-        self.t_encoding = TransformerSinusoidalEncoding(enbed_dim=in_channels, max_len=1000)
+        self.t_encoding = TransformerSinusoidalEncoding(embed_dim=in_channels, max_len=1000)
 
     def forward(self, x, t):
         # x: (batch size X channles X H x W)
@@ -85,7 +85,7 @@ class DownBlock(nn.Module):
             Q = self.q(features_transformed)
             K = self.k(features_transformed)
             V = self.v(features_transformed)
-            features = self.attention(Q, K, V).view(*features.shape)
+            features = self.attention(Q, K, V)[0].reshape(*features.shape)
         
         features = self.block_2(features, t)
         # Downsample
@@ -98,7 +98,7 @@ class UpBlock(nn.Module):
     def __init__(self, n_groups, in_channels, out_channels, dropout=0.5, T=1000, self_attend=False):
         super().__init__()
 
-        self.block_1 = ConvResidBlock(n_groups, in_channels + out_channels, out_channels, dropout, T)
+        self.block_1 = ConvResidBlock(n_groups, in_channels * 2, out_channels, dropout, T)
         self.block_2 = ConvResidBlock(n_groups, out_channels, out_channels, dropout, T)
         
         if self_attend:
@@ -109,7 +109,7 @@ class UpBlock(nn.Module):
         else:
             self.attention = None
         
-        self.upsample = nn.ConvTransposed2d(out_channels, out_channels, kernel_size=3, padding=1, stride=2)
+        self.upsample = nn.ConvTranspose2d(in_channels, in_channels, kernel_size=4, padding=1, stride=2)
 
     def forward(self, x, skip_input, t):
         # Upsample
@@ -124,7 +124,7 @@ class UpBlock(nn.Module):
             Q = self.q(features_transformed)
             K = self.k(features_transformed)
             V = self.v(features_transformed)
-            features = self.attention(Q, K, V).view(*features.shape)
+            features = self.attention(Q, K, V)[0].reshape(*features.shape)
         
         out = self.block_2(features, t)
         return out
@@ -132,36 +132,35 @@ class UpBlock(nn.Module):
 
 class UNet(nn.Module):
     def __init__(self, n_groups=32, in_channels=1, hid_chahhels=32, dropout=0.5, T=1000):
-        super(UNet, self).__init__()
+        super().__init__()
         # DDPM, Appendix B -> "32 × 32 models use four feature map resolutions (32 × 32 to 4 × 4)"
         self.down_blocks = []
         self.up_blocks = []
         self.levels_num = 4
         
-        self.input_block = nn.Conv2d(in_channels, hid_chahhels, 1)
+        self.in_block = nn.Conv2d(in_channels, hid_chahhels, 1)
+        self.out_block = nn.Conv2d(hid_chahhels, in_channels, 1)
 
         cur_channels = hid_chahhels
         for i in range(self.levels_num):
             self.down_blocks.append(DownBlock(n_groups, cur_channels, cur_channels * 2, dropout, T, i==1))
             self.up_blocks.append(UpBlock(n_groups, cur_channels * 2, cur_channels, dropout, T, i==1))
-            cur_ch_num *= 2
+            cur_channels *= 2
         self.up_blocks.reverse()
         
         self.down_blocks = nn.ModuleList(self.down_blocks)
         self.up_blocks = nn.ModuleList(self.up_blocks)
 
     def forward(self, x, t):
-        x = self.input_block(x)
-        skip_inputs = [x]
+        x = self.in_block(x)
+        skip_inputs = []
 
         for i, block in enumerate(self.down_blocks):
             x, features = block(x, t)
-            if i < self.levels_num - 1:
-                skip_inputs.append(torch.clone(features))
+            skip_inputs.append(torch.clone(features))
         skip_inputs.reverse()
 
         for i, block in enumerate(self.up_blocks):
             x = block(x, skip_inputs[i], t)      
-        x = self.output_block(x)
-
-        return x
+        
+        return self.out_block(x)
