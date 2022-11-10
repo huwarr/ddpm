@@ -19,7 +19,7 @@ class TransformerSinusoidalEncoding(nn.Module):
 
     def forward(self, t):
         # t: (batch size X 1)
-        return self.enc[t.squeeze(1), :]
+        return self.enc[t, :]
 
 
 class ConvResidBlock(nn.Module):
@@ -46,7 +46,7 @@ class ConvResidBlock(nn.Module):
     def forward(self, x, t):
         # x: (batch size X channles X H x W)
         # t: (1)
-        t = t.expand(x.shape[0], 1)
+        #t = t.expand(x.shape[0], 1)
         # t_encoded: (batch size X channels)
         t_encoded = self.t_encoding(t)
         t_encoded = t_encoded.view(t_encoded.shape[0], t_encoded.shape[1], 1, 1)
