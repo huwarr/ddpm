@@ -131,14 +131,16 @@ class UpBlock(nn.Module):
 
 
 class UNet(nn.Module):
-    def __init__(self, n_groups, in_channels, dropout=0.5, T=1000):
+    def __init__(self, n_groups=32, in_channels=1, hid_chahhels=32, dropout=0.5, T=1000):
         super(UNet, self).__init__()
         # DDPM, Appendix B -> "32 × 32 models use four feature map resolutions (32 × 32 to 4 × 4)"
         self.down_blocks = []
         self.up_blocks = []
         self.levels_num = 4
         
-        cur_channels = in_channels
+        self.input_block = nn.Conv2d(in_channels, hid_chahhels, 1)
+
+        cur_channels = hid_chahhels
         for i in range(self.levels_num):
             self.down_blocks.append(DownBlock(n_groups, cur_channels, cur_channels * 2, dropout, T, i==1))
             self.up_blocks.append(UpBlock(n_groups, cur_channels * 2, cur_channels, dropout, T, i==1))
@@ -149,6 +151,7 @@ class UNet(nn.Module):
         self.up_blocks = nn.ModuleList(self.up_blocks)
 
     def forward(self, x, t):
+        x = self.input_block(x)
         skip_inputs = [x]
 
         for i, block in enumerate(self.down_blocks):
