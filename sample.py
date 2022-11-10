@@ -5,6 +5,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import numpy as np
+from torchvision.utils import make_grid
 
 from tqdm.auto import tqdm
 import wandb
@@ -36,10 +37,7 @@ def sample_func(model, n_samples=10, use_wandb=False):
 
     size = (n_samples, 1, 32, 32)
     x = torch.from_numpy(np.random.normal(loc=0.0, scale=1.0, size=size))
-
-    all_samples = [x]
-    if use_wandb:
-        wandb.log({"reverse step": wandb.Image(x[0])})
+    reverse_steps = [x[0].tolist()]
     
     for t in tqdm(range(T - 1, -1, -1), desc='Sampling'):
         z = np.random.normal(loc=0.0, scale=1.0, size=size) if t > 0 else np.zeros(size)
@@ -55,12 +53,10 @@ def sample_func(model, n_samples=10, use_wandb=False):
         x = (x - multiplier * noise_predicted) / (alpha_s[t] ** (1/2)) + (beta_s[t] ** (1/2)) * torch.from_numpy(z)
 
         if t % 200 == 0:
-            all_samples.append(x)
-            if use_wandb:
-                wandb.log({"reverse step": wandb.Image(x[0])})
+            reverse_steps.append(x[0].tolist())
         
     if use_wandb:
-        for sample in x:
-            wandb.log({"samples": wandb.Image(sample)})
+        wandb.log({"samples": wandb.Image(make_grid(x, nrow=5))})
+        wandb.log({"reverse step": wandb.Image(make_grid(torch.tensor(reverse_steps), nrow=len(reverse_steps)))})
 
-    return all_samples
+    return x, torch.tensor(reverse_steps)
