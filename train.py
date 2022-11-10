@@ -9,20 +9,17 @@ import numpy as np
 from tqdm.auto import tqdm
 import wandb
 
+from sample import sample_func
 
 
 SEED = 42
 
-def train_func(model, n_epochs=5, use_wandb=False, wandb_key=''):
+def train_func(model, n_epochs=5, use_wandb=False):
     np.random.seed(SEED)
     torch.manual_seed(SEED)
     if torch.cuda.is_available():
         torch.cuda.manual_seed_all(SEED)
         torch.backends.cudnn.deterministic = True
-    
-    if use_wandb:
-        wandb.login(key=wandb_key)
-        wandb.init(project='ddpm')
 
     train_loader, _ = get_dataloaders()
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
@@ -59,5 +56,6 @@ def train_func(model, n_epochs=5, use_wandb=False, wandb_key=''):
                 wandb.log({'train loss': loss.item()}, step=step)
             step += 1
             train_losses.append(loss.item())
+        sample_func(model, use_wandb=use_wandb)
     
     return train_losses

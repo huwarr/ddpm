@@ -14,16 +14,12 @@ import wandb
 
 SEED = 42
 
-def sample_func(model, n_samples=10, use_wandb=False):
+def sample_func(model, n_samples=10, log_step=200, use_wandb=False):
     np.random.seed(SEED)
     torch.manual_seed(SEED)
     if torch.cuda.is_available():
         torch.cuda.manual_seed_all(SEED)
         torch.backends.cudnn.deterministic = True
-    
-    #if use_wandb:
-        #wandb.login(key=wandb_key)
-        #wandb.init(project='ddpm')
 
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
@@ -52,7 +48,7 @@ def sample_func(model, n_samples=10, use_wandb=False):
         multiplier = (1 - alpha_s[t]) / ((1 - alpha_s_new[t]) ** (1/2))
         x = (x - multiplier * noise_predicted) / (alpha_s[t] ** (1/2)) + (beta_s[t] ** (1/2)) * torch.from_numpy(z)
 
-        if t % 200 == 0:
+        if t % log_step == 0 or t == 0:
             reverse_steps.append(x[0].tolist())
         
     if use_wandb:
