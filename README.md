@@ -46,6 +46,41 @@ Here is an example of how the model denoises an image:
 
 <img src="pics/reverse process.png" width="500"/>
 
+### Notebook
+
+You may view code for this experiment in `train_model.ipynb`
+
+## Repository structure
+
+Main part:
+
+- `model.py` - UNet definition
+
+- `dataloader.py` - downloading MNIST dataset and creating dataloaders
+
+- `train.py` - contains training function
+
+- `sample.py` - contains function, that generates samples
+
+Helpful scripts:
+
+- `run.py` - a script to run training process and generate samples with trained model
+
+- `evaluate.py` - a script to load model from checkpoint and generate samples
+
+- `load_and_eval.sh` - a script to download chekpoint and run `evaluate.py`
+
+Others:
+
+- `train_model.ipynb` - a notebook with an above discussed experiment
+
+- `pics/` - a folder with images to display in README (here)
+
+- `generated_samples.jpg` - an example of what `run.py` and `evaluate.py` generate
+
+- `requirements.txt` - necessary dependencies
+
+
 ## Sources
 
 1. [[ARXIV] Denoising Diffusion Probabilistic Models](https://arxiv.org/abs/2006.11239)
