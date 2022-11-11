@@ -16,23 +16,23 @@ The model was trained for approximately 46k steps with Adam optimizer and learni
 
 This way we achieved `loss = 0.004` with the following dynamic:
 
-<img src="pics/train loss.png" width="400" />
+<img src="pics/train loss.png" width="500" />
 
 This number of training steps is clearly not enough, but we chose this nice trade off between training time and quality of generated samples because of limited resources.
 
 ### Generated samples:
 
-<img src="pics/generated samples.png" width="300"/>
+<img src="pics/generated samples.png" width="400"/>
 
 We can see, that the quality of samples is yet to be improved. However, every digit here is easy to recognize, which is a good sign.
 
 Probably, we could have achieved better quality after the same amount of training time by using guidance with labels.
 
-**Reverse diffusion process**:
+### Reverse diffusion process:
 
 Here is an example of how the model denoises an image:
 
-<img src="pics/reverse process.png" width="400"/>
+<img src="pics/reverse process.png" width="500"/>
 
 ## Sources
 
