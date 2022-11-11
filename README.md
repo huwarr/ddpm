@@ -12,7 +12,7 @@ The script will train the model, generate a couple of samples (by default 10, ma
 
 ## Experiments
 
-The model was trained for approximately 46k steps with Adam optimizer and learning rate 2e-4 (as in the paper).
+The model was trained for approximately 46k steps, which took 4 and a half hours with GPU 1/8 A100. We trained the model with Adam optimizer and learning rate 2e-4 (as in the paper).
 
 This way we achieved `loss = 0.004` with the following dynamic:
 
