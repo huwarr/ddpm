@@ -4,6 +4,10 @@ This is a PyTorch implementation of the paper ["Denoising Diffusion Probabilisti
 
 ## Training
 
+First, install the dependencies by running:
+
+`pip install -r requirements.txt`
+
 The model can be trained via running `run.py` script. For example:
 
 `python run.py --n_epochs 100`
