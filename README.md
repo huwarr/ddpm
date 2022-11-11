@@ -14,6 +14,12 @@ The model can be trained via running `run.py` script. For example:
 
 The script will train the model, generate a couple of samples (by default 10, may be specified with `--n_samples` parameter), and save these sample into `generated_samples.jpg`.
 
+## Evaluation with checkpoint
+
+You may load a checkpoint of the trained model from the further discussed experiment, and generate samples with it with running:
+
+`sh load_and_eval.sh`
+
 ## Experiments
 
 The model was trained for approximately 46k steps, which took 4 and a half hours with GPU 1/8 A100. We trained the model with Adam optimizer and learning rate 2e-4 (as in the paper).
