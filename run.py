@@ -3,6 +3,7 @@ from sample import sample_func
 from model import UNet
 
 import torch
+import wandb
 from PIL import Image
 import argparse
 import logging
