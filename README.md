@@ -20,6 +20,8 @@ You may load a checkpoint of the trained model from the further discussed experi
 
 `sh load_and_eval.sh`
 
+This script will download a chekpoint `ddpm_trained.pt` and run `evaluate.py` script, which will generate 10 samples using a model, loaded from this chekpoint. Samples will be saved into `generated_samples.jpg`.
+
 ## Experiments
 
 The model was trained for approximately 46k steps, which took 4 and a half hours with GPU 1/8 A100. We trained the model with Adam optimizer and learning rate 2e-4 (as in the paper).
