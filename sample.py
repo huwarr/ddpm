@@ -1,5 +1,5 @@
-from dataloader import get_dataloaders
-from model import UNet
+from data.dataloader import get_dataloaders
+from model.ddpm import UNet
 
 import torch
 import torch.nn as nn
@@ -12,9 +12,7 @@ import wandb
 
 
 
-SEED = 42
-
-def sample_func(model, n_samples=10, log_step=200, use_wandb=False):
+def sample_func(model, n_samples=10, log_step=200, use_wandb=False, SEED=42):
     # Fix seed to get the same pictures every time and see, how they are improving over time
     np.random.seed(SEED)
     torch.manual_seed(SEED)

@@ -1,5 +1,5 @@
 from sample import sample_func
-from model import UNet
+from model.ddpm import UNet
 
 import torch
 from torchvision.utils import make_grid, save_image
@@ -9,9 +9,12 @@ import logging
 import math
 
 parser = argparse.ArgumentParser()
+parser.add_argument("--dataset", type=str, default="CIFAR10", help="dataset to evaluate on")
 parser.add_argument("--n_samples", type=int, default=10, help="number of samples to generate")
 
 args = parser.parse_args()
+
+assert args.dataset == 'CIFAR10' or args.dataset == 'MNIST', "This dataset is unavaliable. Please, choose MNIST or CIFAR10"
 
 logging.basicConfig(level=logging.NOTSET)
 handle = ""
