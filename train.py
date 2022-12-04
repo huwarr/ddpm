@@ -52,10 +52,10 @@ def train_func(model, dataset_name, n_steps=800_000, use_wandb=False, sample_dur
     train_losses = []
     for n in tqdm(range(n_steps), desc='Training, step'):
         try:
-            batch = next(train_iter)
+            batch, _ = next(train_iter)
         except StopIteration:
             train_iter - iter(train_loader)
-            batch = next(train_iter)
+            batch, _ = next(train_iter)
         # Get timestamps from unifor distribution
         n_samples = batch.shape[0]
         t_s = np.random.randint(low=0, high=T, size=n_samples)
@@ -81,6 +81,6 @@ def train_func(model, dataset_name, n_steps=800_000, use_wandb=False, sample_dur
         train_losses.append(loss.item())
         if sample_during_training and n % sample_step == 0:
             sample_func(model, use_wandb=use_wandb)
-            sample_func(ema, use_wandb=use_wandb)
+            sample_func(ema, use_wandb=use_wandb, with_ema=True)
 
     return train_losses, ema

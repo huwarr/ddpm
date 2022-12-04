@@ -13,7 +13,7 @@ import wandb
 
 
 
-def sample_func(model, n_samples=10, log_step=200, use_wandb=False, with_ema=False, SEED=42):
+def sample_func(model, in_channels=3, n_samples=10, log_step=200, use_wandb=False, with_ema=False, SEED=42):
     # Fix seed to get the same pictures every time and see, how they are improving over time
     np.random.seed(SEED)
     torch.manual_seed(SEED)
@@ -34,7 +34,7 @@ def sample_func(model, n_samples=10, log_step=200, use_wandb=False, with_ema=Fal
     model = model.to(device)
     model.eval()
     # Let's get pure Gaussian noise to start with in the reverse diffusion process
-    size = (n_samples, 1, 32, 32)
+    size = (n_samples, in_channels, 32, 32)
     x = torch.from_numpy(np.random.normal(loc=0.0, scale=1.0, size=size))
     # Save an example of how a particular image is being denoised to visualize later
     reverse_steps = [x[0].tolist()]
@@ -58,7 +58,7 @@ def sample_func(model, n_samples=10, log_step=200, use_wandb=False, with_ema=Fal
             reverse_steps.append(x[0].tolist())
         
         if t == 0:
-            nll = compute_nll(torch.clip(x, -1, 1), mean, beta_s[t] ** (1/2))
+            nll = compute_nll(torch.clip(x, -1, 1).cpu().numpy(), mean.cpu().numpy(), beta_s[t] ** (1/2))
             if use_wandb:
                 wandb.log({'NLL': nll})
 
