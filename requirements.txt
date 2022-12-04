@@ -1,7 +1,9 @@
-numpy==1.22.4
+ema_pytorch==0.1.2
+numpy==1.21.1
 Pillow==9.3.0
-torch==1.12.1
-torchvision==0.14.0
-tqdm==4.64.1
+scipy==1.8.0
+torch==1.12.0
+torchmetrics==0.11.0
+torchvision==0.10.1
+tqdm==4.62.3
 wandb==0.13.5
-ema-pytorch==0.1.2
