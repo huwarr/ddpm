@@ -28,6 +28,7 @@ def get_dataloaders(dataset_name):
         # CIFAR10
         train_transform = transforms.Compose([
             transforms.ToTensor(),
+            transforms.RandomHorizontalFlip(),
             transforms.Resize((32, 32))
         ])
         test_transform = transforms.Compose([
