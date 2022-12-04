@@ -66,11 +66,14 @@ def sample_func(model, in_channels=3, n_samples=10, log_step=200, use_wandb=Fals
     # Let's clip at the end - this is important, but we don't want to interfere with denosing process
     x = torch.clip(x, -1, 1)
     reverse_steps = torch.clip(torch.tensor(reverse_steps), -1, 1)
+
+    x_to_log = ((x + 1) * 127.5).int()
+    reverse_steps_to_log = ((reverse_steps + 1) * 127.5).int()
         
     if use_wandb:
         samples_title = 'samples (with EMA)' if with_ema else 'samples'
         reverse_step_title = 'reverse step (with EMA)' if with_ema else 'reverse step'
-        wandb.log({samples_title: wandb.Image(make_grid(x, nrow=5))})
-        wandb.log({reverse_step_title: wandb.Image(make_grid(reverse_steps, nrow=reverse_steps.shape[0]))})
+        wandb.log({samples_title: wandb.Image(make_grid(x_to_log, nrow=5))})
+        wandb.log({reverse_step_title: wandb.Image(make_grid(reverse_steps_to_log, nrow=reverse_steps_to_log.shape[0]))})
 
     return x, reverse_steps, nll
