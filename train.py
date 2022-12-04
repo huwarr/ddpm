@@ -9,6 +9,8 @@ import numpy as np
 from tqdm.auto import tqdm
 import wandb
 
+from ema_pytorch import EMA
+
 from sample import sample_func
 
 
@@ -21,6 +23,11 @@ def train_func(model, dataset_name, n_steps=800_000, use_wandb=False, sample_dur
     if torch.cuda.is_available():
         torch.cuda.manual_seed_all(SEED)
         torch.backends.cudnn.deterministic = True
+
+    ema = EMA(
+        model,
+        beta = 0.9999
+    )
 
     # Get train dataloader
     train_loader, _ = get_dataloaders(dataset_name)
@@ -43,7 +50,6 @@ def train_func(model, dataset_name, n_steps=800_000, use_wandb=False, sample_dur
 
     # Training
     train_losses = []
-    step = 0
     for n in tqdm(range(n_steps), desc='Training, step'):
         try:
             batch = next(train_iter)
@@ -67,12 +73,14 @@ def train_func(model, dataset_name, n_steps=800_000, use_wandb=False, sample_dur
         loss = criterion(outputs, targets)
         loss.backward()
         optimizer.step()
+        ema.update()
 
         if use_wandb:
-            wandb.log({'train loss': loss.item()}, step=step)
+            wandb.log({'train loss': loss.item()}, step=n)
 
         train_losses.append(loss.item())
         if sample_during_training and n % sample_step == 0:
             sample_func(model, use_wandb=use_wandb)
+            sample_func(ema, use_wandb=use_wandb)
 
-    return train_losses
+    return train_losses, ema

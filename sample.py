@@ -12,7 +12,7 @@ import wandb
 
 
 
-def sample_func(model, n_samples=10, log_step=200, use_wandb=False, SEED=42):
+def sample_func(model, n_samples=10, log_step=200, use_wandb=False, with_ema=False, SEED=42):
     # Fix seed to get the same pictures every time and see, how they are improving over time
     np.random.seed(SEED)
     torch.manual_seed(SEED)
@@ -59,7 +59,9 @@ def sample_func(model, n_samples=10, log_step=200, use_wandb=False, SEED=42):
     reverse_steps = torch.clip(torch.tensor(reverse_steps), 0, 1)
         
     if use_wandb:
-        wandb.log({"samples": wandb.Image(make_grid(x, nrow=5))})
-        wandb.log({"reverse step": wandb.Image(make_grid(reverse_steps, nrow=reverse_steps.shape[0]))})
+        samples_title = 'samples (with EMA)' if with_ema else 'samples'
+        reverse_step_title = 'reverse step (with EMA)' if with_ema else 'reverse step'
+        wandb.log({samples_title: wandb.Image(make_grid(x, nrow=5))})
+        wandb.log({reverse_step_title: wandb.Image(make_grid(reverse_steps, nrow=reverse_steps.shape[0]))})
 
     return x, reverse_steps
