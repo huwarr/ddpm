@@ -59,11 +59,11 @@ class ConvResidBlock(nn.Module):
             # DDPM, Appendix B -> "replaced weight normalization [49] with group normalization [66]"
             # Wide ResNet, 2 -> changes order from Conv->Norm->Activation to Norm->Activation->Conv
             nn.GroupNorm(num_groups=n_groups, num_channels=in_channels),
-            nn.ReLU(),
+            nn.SiLU(),
             # kernel_size=3 and padding=1 => image size will be unchanged
             nn.Conv2d(in_channels, out_channels, kernel_size=3, padding=1),
             nn.GroupNorm(num_groups=n_groups, num_channels=out_channels),
-            nn.ReLU(),
+            nn.SiLU(),
             # Wide Resnet, 2.4 -> "add a dropout layer into each residual block between convolutions and after ReLU"
             nn.Dropout(dropout),
             nn.Conv2d(out_channels, out_channels, kernel_size=3, padding=1)
