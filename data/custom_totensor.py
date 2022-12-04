@@ -16,4 +16,4 @@ class CustomToTensor:
         """
         arr = np.asarray(pic)
         arr = arr.astype(np.float32) / 127.5 - 1
-        return torch.from_numpy(arr)
+        return torch.from_numpy(arr).permute(2, 0, 1)

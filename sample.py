@@ -60,15 +60,18 @@ def sample_func(model, in_channels=3, n_samples=10, log_step=200, use_wandb=Fals
         if t == 0:
             nll = compute_nll(torch.clip(x, -1, 1).cpu().numpy(), mean.cpu().numpy(), beta_s[t] ** (1/2))
             if use_wandb:
-                wandb.log({'NLL': nll})
+                nll_title = 'NLL (with EMA)' if with_ema else 'NLL'
+                wandb.log({nll_title: nll})
 
     
     # Let's clip at the end - this is important, but we don't want to interfere with denosing process
     x = torch.clip(x, -1, 1)
     reverse_steps = torch.clip(torch.tensor(reverse_steps), -1, 1)
 
-    x_to_log = ((x + 1) * 127.5).int()
-    reverse_steps_to_log = ((reverse_steps + 1) * 127.5).int()
+    x_to_log = torch.clamp((x + 1) * 127.5, 0, 255)
+    x_to_log = x_to_log / 255
+    reverse_steps_to_log = torch.clamp((reverse_steps + 1) * 127.5, 0, 255)
+    reverse_steps_to_log = reverse_steps_to_log / 255
         
     if use_wandb:
         samples_title = 'samples (with EMA)' if with_ema else 'samples'

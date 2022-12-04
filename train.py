@@ -54,7 +54,7 @@ def train_func(model, dataset_name, n_steps=800_000, use_wandb=False, sample_dur
         try:
             batch, _ = next(train_iter)
         except StopIteration:
-            train_iter - iter(train_loader)
+            train_iter = iter(train_loader)
             batch, _ = next(train_iter)
         # Get timestamps from unifor distribution
         n_samples = batch.shape[0]
