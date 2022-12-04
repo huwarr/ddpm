@@ -29,7 +29,7 @@ logger = logging.getLogger(handle)
 
 # Training
 torch.manual_seed(42)
-ddpm_model = UNet(dropout=0.1)
+ddpm_model = UNet(in_cahhels=3, dropout=0.1, T=1000)
 if args.use_wandb:
     wandb.login(key=args.wandb_key)
     wandb.init(project='ddpm_cifar10')
