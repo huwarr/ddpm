@@ -1,6 +1,7 @@
 from torch.utils.data import DataLoader
 from torchvision.datasets import MNIST, CIFAR10
 from torchvision import transforms
+from data.custom_totensor import CustomToTensor
 
 BATCH_SIZE = 128
 
@@ -27,13 +28,13 @@ def get_dataloaders(dataset_name):
     else:
         # CIFAR10
         train_transform = transforms.Compose([
-            transforms.ToTensor(),
             transforms.RandomHorizontalFlip(),
-            transforms.Resize((32, 32))
+            transforms.Resize((32, 32)),
+            CustomToTensor()
         ])
         test_transform = transforms.Compose([
-            transforms.ToTensor(),
-            transforms.Resize((32, 32))
+            transforms.Resize((32, 32)),
+            CustomToTensor()
         ])
 
         train_dataset = CIFAR10(root='./CIFAR10/', train=True, transform=train_transform, download=True)
