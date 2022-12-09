@@ -5,6 +5,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import numpy as np
+from torchvision.utils import make_grid, save_image
 
 from tqdm.auto import tqdm
 import wandb
@@ -16,7 +17,7 @@ from sample import sample_func
 
 SEED = 42
 
-def train_func(model, dataset_name, n_steps=800_000, use_wandb=False, sample_during_training=False, sample_step=1000):
+def train_func(model, dataset_name, n_steps=800_000, use_wandb=False, sample_during_training=False, sample_step=10000, SEED=42, T=1000):
     # Fix seed for reprodicibility
     np.random.seed(SEED)
     torch.manual_seed(SEED)
@@ -36,7 +37,6 @@ def train_func(model, dataset_name, n_steps=800_000, use_wandb=False, sample_dur
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
     # Total number of steps
-    T = 1000
     # Optimizer; they use this one with this LR in DDPM paper
     optimizer = torch.optim.Adam(model.parameters(), lr=2e-4)
     # Loss - MSE
@@ -80,7 +80,11 @@ def train_func(model, dataset_name, n_steps=800_000, use_wandb=False, sample_dur
 
         train_losses.append(loss.item())
         if sample_during_training and n % sample_step == 0:
-            sample_func(model, use_wandb=use_wandb)
-            sample_func(ema, use_wandb=use_wandb, with_ema=True)
+            samples, _ = sample_func(model, use_wandb=use_wandb)
+            grid = make_grid(samples, nrow=5)
+            save_image(grid, fp='samples/{}.png'.format(n))
+            samples_ema, _ = sample_func(ema, use_wandb=use_wandb, with_ema=True)
+            grid = make_grid(samples_ema, nrow=5)
+            save_image(grid, fp='samples_ema/{}.png'.format(n))
 
     return train_losses, ema
