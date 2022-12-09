@@ -30,13 +30,14 @@ handle = ""
 logger = logging.getLogger(handle)
 
 IN_CHANNELS = 3
+HID_CHANNELS = 128
 DROPOUT = 0.1
 TOTAL_STEPS = 1000
 SEED = 42
 
 # Training
 torch.manual_seed(SEED)
-ddpm_model = UNet(in_channels=IN_CHANNELS, dropout=DROPOUT, T=TOTAL_STEPS)
+ddpm_model = UNet(in_channels=IN_CHANNELS, hid_chahhels=HID_CHANNELS, dropout=DROPOUT, T=TOTAL_STEPS)
 if args.use_wandb:
     wandb.login(key=args.wandb_key)
     wandb.init(project='ddpm_cifar10')
