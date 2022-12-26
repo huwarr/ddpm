@@ -1,3 +1,5 @@
+import os
+
 from train import train_func
 from sample import sample_func
 from model.ddpm import UNet
@@ -24,6 +26,8 @@ parser.add_argument("--n_samples", type=int, default=10, help="number of samples
 args = parser.parse_args()
 
 assert args.dataset == 'CIFAR10' or args.dataset == 'MNIST', "This dataset is unavaliable. Please, choose MNIST or CIFAR10"
+
+assert os.path.exists('./weights-inception-2015-12-05-6726825d.pth'), "Download InceptionV3 first, from here: https://github.com/toshas/torch-fidelity/releases/download/v0.2.0/weights-inception-2015-12-05-6726825d.pth"
 
 logging.basicConfig(level=logging.NOTSET)
 handle = ""
