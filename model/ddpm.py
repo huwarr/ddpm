@@ -242,6 +242,15 @@ class UNet(nn.Module):
         self.down_blocks = nn.ModuleList(self.down_blocks)
         self.up_blocks = nn.ModuleList(self.up_blocks)
 
+        self.initialize()
+    
+    # SOURCE: https://github.com/w86763777/pytorch-ddpm/blob/82c4df37ad756219cde9e04e9b90a2dc73edc65e/model.py#L208 
+    def initialize(self):
+        nn.init.xavier_uniform_(self.in_block.weight)
+        nn.init.zeros_(self.in_block.bias)
+        nn.init.xavier_uniform_(self.out_block.weight, gain=1e-5)
+        nn.init.zeros_(self.out_block.bias)
+
     def forward(self, x, t):
         # Change number of channels of the image
         x = self.in_block(x)
