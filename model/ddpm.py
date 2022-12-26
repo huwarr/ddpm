@@ -204,7 +204,7 @@ class UNet(nn.Module):
     """
     UNet - the model we will use to predict noise for each step
     """
-    def __init__(self, n_groups=32, in_channels=3, hid_chahhels=32, dropout=0.1, T=1000):
+    def __init__(self, n_groups=32, in_channels=3, hid_chahhels=128, dropout=0.1, T=1000):
         """
         n_groups: int
             a parameter for group norm
