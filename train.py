@@ -17,7 +17,7 @@ from sample import sample_func
 
 SEED = 42
 
-def train_func(model, dataset_name, n_steps=800_000, use_wandb=False, sample_during_training=False, sample_step=10000, SEED=42, T=1000):
+def train_func(model, dataset_name, n_steps=800_000, use_wandb=False, sample_during_training=False, sample_step=10000, SEED=42, T=1000, warmup=5000):
     # Fix seed for reprodicibility
     np.random.seed(SEED)
     torch.manual_seed(SEED)
@@ -48,6 +48,9 @@ def train_func(model, dataset_name, n_steps=800_000, use_wandb=False, sample_dur
     model = model.to(device)
     model.train()
 
+    # Scheduler
+    scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda=lambda step: min(step, warmup) / warmup)
+
     # Training
     train_losses = []
     for n in tqdm(range(n_steps), desc='Training, step'):
@@ -73,6 +76,7 @@ def train_func(model, dataset_name, n_steps=800_000, use_wandb=False, sample_dur
         loss = criterion(outputs, targets)
         loss.backward()
         optimizer.step()
+        scheduler.step()
         ema.update()
 
         if use_wandb:
