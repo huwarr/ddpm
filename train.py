@@ -17,7 +17,9 @@ from sample import sample_func
 
 SEED = 42
 
-def train_func(model, dataset_name, n_steps=800_000, use_wandb=False, sample_during_training=False, sample_step=10000, SEED=42, T=1000, warmup=5000):
+def train_func(
+    model, dataset_name, n_steps=800_000, use_wandb=False, sample_during_training=False, sample_step=10000, SEED=42, T=1000, warmup=5000, grad_clip=1.0
+):
     # Fix seed for reprodicibility
     np.random.seed(SEED)
     torch.manual_seed(SEED)
@@ -75,6 +77,7 @@ def train_func(model, dataset_name, n_steps=800_000, use_wandb=False, sample_dur
         outputs = model(noised_inputs, t_s)
         loss = criterion(outputs, targets)
         loss.backward()
+        torch.nn.utils.clip_grad_norm_(model.parameters(), grad_clip)
         optimizer.step()
         scheduler.step()
         ema.update()
