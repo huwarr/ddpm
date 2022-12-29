@@ -1,2 +1,9 @@
 **/.DS_Store
 *.pth
+*.pt
+**/CIFAR10
+**/__pycache__
+**/runs
+**/samples
+**/samples_ema
+*.sbatch
