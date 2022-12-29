@@ -51,8 +51,8 @@ logger.info('Finished training!')
 logger.info('Loss on training set: {}'.format(losses[-1]))
 
 # Save checkpoints
-torch.save(ddpm_model, 'ddpm_model.pth')
-torch.save(ema, 'ema.pth')
+torch.save(ddpm_model.state_dict(), 'model.pt')
+torch.save(ema.state_dict(), 'model_ema.pt')
 
 # Generate samples
 logger.info('Generating {} samples...'.format(args.n_samples))
