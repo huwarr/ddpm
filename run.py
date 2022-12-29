@@ -45,6 +45,8 @@ ddpm_model = UNet(in_channels=IN_CHANNELS, hid_chahhels=HID_CHANNELS, dropout=DR
 if args.use_wandb:
     wandb.login(key=args.wandb_key)
     wandb.init(project='ddpm_cifar10')
+num_params = sum([p.numel() for p in ddpm_model.parameters()])
+logger.info('The model has {} parameters'.format(num_params))
 logger.info('Start training, steps: {}...'.format(args.n_steps))
 losses, ema = train_func(ddpm_model, args.dataset, n_steps=args.n_steps, use_wandb=args.use_wandb, sample_during_training=args.sample_during_training, SEED=SEED, T=TOTAL_STEPS)
 logger.info('Finished training!')
