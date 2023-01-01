@@ -37,8 +37,8 @@ def get_dataloaders(dataset_name):
             CustomToTensor()
         ])
 
-        train_dataset = CIFAR10(root='./CIFAR10/', train=True, transform=train_transform, download=True)
-        test_dataset = CIFAR10(root='./CIFAR10/', train=False, transform=test_transform, download=True)
+        train_dataset = CIFAR10(root='./CIFAR10/', train=True, transform=train_transform, download=False)
+        test_dataset = CIFAR10(root='./CIFAR10/', train=False, transform=test_transform, download=False)
 
         train_loader = DataLoader(dataset=train_dataset, batch_size=BATCH_SIZE, shuffle=True)
         test_loader = DataLoader(dataset=test_dataset, batch_size=BATCH_SIZE, shuffle=False)
