@@ -45,14 +45,16 @@ ddpm_model = UNet(in_channels=IN_CHANNELS, hid_chahhels=HID_CHANNELS, dropout=DR
 if args.use_wandb:
     wandb.login(key=args.wandb_key)
     wandb.init(project='ddpm_cifar10')
+num_params = sum([p.numel() for p in ddpm_model.parameters()])
+logger.info('The model has {} parameters'.format(num_params))
 logger.info('Start training, steps: {}...'.format(args.n_steps))
 losses, ema = train_func(ddpm_model, args.dataset, n_steps=args.n_steps, use_wandb=args.use_wandb, sample_during_training=args.sample_during_training, SEED=SEED, T=TOTAL_STEPS)
 logger.info('Finished training!')
 logger.info('Loss on training set: {}'.format(losses[-1]))
 
 # Save checkpoints
-torch.save(ddpm_model, 'ddpm_model.pth')
-torch.save(ema, 'ema.pth')
+torch.save(ddpm_model.state_dict(), 'model.pt')
+torch.save(ema.state_dict(), 'model_ema.pt')
 
 # Generate samples
 logger.info('Generating {} samples...'.format(args.n_samples))

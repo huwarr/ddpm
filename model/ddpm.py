@@ -234,9 +234,10 @@ class UNet(nn.Module):
         # Each UNet's block increases/decreases number of channels twice
         cur_channels = hid_chahhels
         for i in range(self.levels_num):
-            self.down_blocks.append(DownBlock(n_groups, cur_channels, cur_channels * 2, dropout, T, i==1))
-            self.up_blocks.append(UpBlock(n_groups, cur_channels * 2, cur_channels, dropout, T, i==1))
-            cur_channels *= 2
+            next_ch = cur_channels if i == 0 else cur_channels * 2
+            self.down_blocks.append(DownBlock(n_groups, cur_channels, next_ch, dropout, T, i==1))
+            self.up_blocks.append(UpBlock(n_groups, next_ch, cur_channels, dropout, T, i==1))
+            cur_channels = next_ch
         self.up_blocks.reverse()
         # Module list to make gradients flow to each block as well
         self.down_blocks = nn.ModuleList(self.down_blocks)

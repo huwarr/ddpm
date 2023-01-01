@@ -49,6 +49,7 @@ def train_func(
     # Move the model to device and to a train mode
     model = model.to(device)
     model.train()
+    ema = ema.to(device)
 
     # Scheduler
     scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda=lambda step: min(step, warmup) / warmup)
