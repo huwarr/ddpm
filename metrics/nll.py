@@ -93,7 +93,7 @@ def compute_nll(model, dataset_name, T=1000, is_train=False):
                 
                 term = kl_between_normal(mu_q, var_q, mu_p, var_p).flatten(1).sum(1)
             else:
-                term = -compute_nll(batch.numpy(), mu_p.numpy(), var_p.numpy()).flatten(1).sum(1)
+                term = -discrete_log_likelihood(batch.numpy(), mu_p.numpy(), var_p.numpy()).flatten(1).sum(1)
             nelbo += term
 
         nll += nelbo.sum().item()
