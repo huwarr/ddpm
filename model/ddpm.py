@@ -251,10 +251,10 @@ class UpBlock(nn.Module):
         features = self.block_1(x, t)
         features = self.attention_1(features)
 
-        features = self.block_2(x, t)
+        features = self.block_2(features, t)
         features = self.attention_2(features)
 
-        features = self.block_3(x, t)
+        features = self.block_3(features, t)
         features = self.attention_3(features)
 
         return features
@@ -311,7 +311,12 @@ class UNet(nn.Module):
         # Precisely, it must be dividsble by n_groups
         assert hid_chahhels % n_groups == 0
         self.in_block = nn.Conv2d(in_channels, hid_chahhels, kernel_size=3, padding=1)
-        
+        # Don't forget to return to the initial number of channels at the end
+        self.out_block = nn.Sequential(
+            nn.GroupNorm(n_groups, hid_chahhels),
+            nn.SiLU(),
+            nn.Conv2d(hid_chahhels, in_channels, kernel_size=3, padding=1)
+        )
         # Each UNet's block increases/decreases number of channels twice
         cur_channels = hid_chahhels
         for i in range(self.levels_num):
@@ -322,12 +327,6 @@ class UNet(nn.Module):
         self.up_blocks.reverse()
         # Middle blocks
         self.middle_block = MiddleBlock(n_groups, cur_channels, time_embed_dim, dropout)
-        # Don't forget to return to the initial number of channels at the end
-        self.out_block = nn.Sequential(
-            nn.GroupNorm(n_groups, cur_channels),
-            nn.SiLU(),
-            nn.Conv2d(cur_channels, in_channels, kernel_size=3, padding=1)
-        )
         # Module list to make gradients flow to each block as well
         self.down_blocks = nn.ModuleList(self.down_blocks)
         self.up_blocks = nn.ModuleList(self.up_blocks)
@@ -358,13 +357,3 @@ class UNet(nn.Module):
             x = block(x, skip_inputs[i], t)      
         # Return to the initial number of channels
         return self.out_block(x)
-
-
-if __name__ == '__main__':
-    batch_size = 8
-    model = UNet(
-        T=1000, ch=128, ch_mult=[1, 2, 2, 2], attn=[1],
-        num_res_blocks=2, dropout=0.1)
-    x = torch.randn(batch_size, 3, 32, 32)
-    t = torch.randint(1000, (batch_size, ))
-    y = model(x, t)
