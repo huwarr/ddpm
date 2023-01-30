@@ -6,6 +6,7 @@ mkdir CIFAR10
 cd CIFAR10
 wget "https://www.cs.toronto.edu/~kriz/cifar-10-python.tar.gz"
 tar -xf cifar-10-python.tar.gz
+cd ..
 
 # Create directories
 mkdir 50000_samples
